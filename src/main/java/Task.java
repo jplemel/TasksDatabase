@@ -19,6 +19,9 @@ public class Task {
     //Private
     private static int staticTaskIDCounter = 1;
 
+    Task(String description){
+        this.description = description;
+    }
     //task has no ID
     public Task(String description, Date dueDate, String attachment, String typeOfTask){
 

@@ -1,5 +1,8 @@
+import sun.rmi.runtime.Log;
+
 import java.sql.*;
-import java.util.Scanner;
+import java.util.Vector;
+
 
 /**
  * Created by Jennifer Plemel on 12/4/2016.
@@ -10,51 +13,157 @@ public class TasksDB {
 
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver"; //Configure the driver needed
     static final String DB_CONNECTION_URL = "jdbc:mysql://localhost:3306/tasks"; //Connection string – where's the database?
-    static final String USER = "Jen"; //TODO replace with your username
-    static final String PASSWORD = "kitty"; //TODO replace with your password
+    static final String USER = "Jen";
+    static final String PASSWORD = "kitty";
 
-    public static void main(String[] args) throws Exception { //TODO handle exceptions properly
+    //set up a logging object
+    //private Log log = new Log();
 
-        TaskViewerGUI taskViewerGUI = new TaskViewerGUI();
+    TasksDB(){
 
-        Scanner scanner = new Scanner(System.in);
-
-        Class.forName(JDBC_DRIVER); //Instantiate the driver class
-        Connection connection = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD); //Create a connection to DB
-
-        Statement statement = connection.createStatement(); //A statement object is used to run SQL statements
-
-
-
-        statement.execute("CREATE TABLE IF NOT EXISTS tasks (Task_description VARCHAR(255),Type_of_task VARCHAR(255), Attachments VARCHAR(255), Due_date DATE, Date_Completed DATE, Completed_By VARCHAR(255))"); //Run some SQL – create table
-
-//        statement.execute("INSERT INTO cubes VALUES ('Cubestormer II robot', 5) "); //Add some test data
-//        statement.execute("INSERT INTO cubes VALUES ('Fakhri Raihaan (using his feet)', 27) "); //And some more test data
-//        statement.execute("INSERT INTO cubes VALUES ('Ruxin Liu (age 3)', 99) "); //Add some test data
-//        statement.execute("INSERT INTO cubes VALUES ('Mats Valk (human record holder)', 6) "); //Add some test data
-
-//        boolean cont = true; //Does the user want to continue, if yes, cont = true
-//
-//        System.out.println("Would you like to make a new entry to the Cube Database? (y or n)");
-//        String addNew = scanner.nextLine();
-//
-//        if (addNew.equalsIgnoreCase("n")) {
-//            cont = false;
-//        } else if (addNew.equalsIgnoreCase("y")) {
-//            enterSomething(cont, statement);
-//        }
-
-
-        ResultSet rs = statement.executeQuery("SELECT * FROM cubes"); //Fetch all data; data is returned in a ResultSet
-        while (rs.next()) {    //Loop over ResultSet, and print data
-            System.out.println("Who solved the rubiks cube: " + rs.getString(1));
-            System.out.println("Time taken, in seconds: " + rs.getInt(2));
-            System.out.println("*****");
+        try {
+            Class.forName(JDBC_DRIVER);
+        } catch (ClassNotFoundException cnfe){
+            //log.error("Can't instantiate driver class; check drives and classpath");
+            cnfe.printStackTrace();
+            System.exit(-1); //exit if driver doesn't work
         }
-        statement.execute("DROP TABLE cubes"); //Delete the table (you don't usually do this in your applications :)
-        rs.close(); //Close the result set, statement and connection, release resources
-        statement.close();
-        connection.close();
     }
 
-}
+    void createTables(){
+
+        try (
+                Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
+                //A statement object is used to run SQL statements
+                Statement statement = conn.createStatement()){
+
+            //Database should have already been created
+
+            //Create table in the database if it doesn't already exist
+
+            String createTableSQL[] = {
+                    "CREATE TABLE IF NOT EXISTS Tasks(" +
+                            "TaskID int NULL AUTO_INCREMENT, " +
+                            "Description varchar(255), " +
+                            "DueDate DATE, " +
+                            "DateCompleted DATE, " +
+                            "CompletedBy varchar(255), " +
+                            "Attachment varchar(255), " +
+                            "TypeOfTask varchar(255)" +
+                            ")",
+            };
+            for (int x = 0; x < createTableSQL.length; x++){
+                statement.execute(createTableSQL[x]);
+
+            }
+
+            //log.info("Created table");
+
+            statement.close();
+            conn.close();
+        }
+        catch (SQLException se){
+            se.printStackTrace();
+        }
+    }
+
+    void addTask(Task task){
+
+        //try with resources connect to database
+
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
+
+            //set up prepared statement
+            String prepStatStr = "INSERT INTO Tasks VALUES(?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement insertPS = conn.prepareStatement(prepStatStr);
+            insertPS.setInt(1, 0);
+            insertPS.setString(2, task.getDescription()); //task.description? or method?
+            insertPS.setDate(3, task.getDueDate());
+            insertPS.setDate(4, task.getDateCompleted());
+            insertPS.setString(5, task.getCompletedBy());
+            insertPS.setString(6, task.getAttachment());
+            insertPS.setString(7, task.getTypeOfTask());
+
+            //actually put it in the database
+            insertPS.execute();
+
+            //log.info("Added Task for " + task);
+
+            insertPS.close();
+            conn.close();
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    void updateTask(int currentID, Task task){
+
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
+
+            String updateStr =
+                    "UPDATE Tasks " +
+                            "SET Description = ?, " +
+                            "DueDate = ?, " +
+                            "DateCompleted = ?, " +
+                            "CompletedBy = ?, " +
+                            "Attachment = ?, " +
+                            "TypeOfTask = ?, " +
+
+                            "WHERE TaskID = ?";
+            PreparedStatement updatePS = conn.prepareStatement(updateStr);
+
+            updatePS.setString(1, task.getDescription());
+            updatePS.setDate(2, task.getDueDate());
+            updatePS.setDate(3, task.getDateCompleted()); //get or set methods?? same question for above? in addTask()
+            updatePS.setString(4, task.getCompletedBy());
+            updatePS.setString(5, task.getAttachment());
+            updatePS.setString(6, task.getTypeOfTask());
+            updatePS.setInt(7, currentID);
+
+            updatePS.executeUpdate();
+
+            //log.info("Updated record " + currentID + " to " + task);
+
+            updatePS.close();
+            conn.close();
+
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        Vector<Task> fetchAllTasks(){
+            Vector<Task> allTasks = new Vector<>();
+
+            try ( //try with resources
+
+                  Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
+                  Statement statement = conn.createStatement()){
+
+                String selectAllSQL = "SELECT * FROM Tasks";
+                ResultSet rs = statement.executeQuery(selectAllSQL);
+
+                while (rs.next()){
+                    int id = rs.getInt("TaskID");
+                    String description = rs.getString("Description");
+                    Date dueDate = rs.getDate("DueDate");
+                    Date dateCompleted = rs.getDate("DateCompleted");
+                    String completedBy = rs.getString("CompletedBy");
+                    String attachment = rs.getString("Attachment");
+                    String typeOfTask = rs.getString("TypeOfTask");
+                    Task task = new Task(description, id,dueDate, dateCompleted, completedBy, attachment, typeOfTask);
+                    allTasks.add(task);
+                }
+
+                rs.close();
+                statement.close();
+                conn.close();
+
+                //log.debug("Retrieved all Tasks");
+            } catch (SQLException e){
+                e.printStackTrace();
+               // return null; //we have to return something OR DO WE?
+            }
+        }
+    }}
