@@ -1,4 +1,3 @@
-import java.util.Date;
 /**
  * Created by Jennifer Plemel on 12/4/2016.
  */
@@ -9,27 +8,35 @@ public class Task {
 
 
     private String description;
-    private Date dueDate;
-    private Date dateCompleted;
+    private String dueDate;
+    private String dateCompleted;
     private String completedBy;
     private String attachment;
     private String typeOfTask;
+    private Controller controller;
+
 
     //If any task object modifies this counter, all Ticket objects will have the modified value
     //Private
-    private static int staticTaskIDCounter = 1;
+    private static int staticTaskIDCounter;
 
-    Task(String description){
-        this.description = description;
-    }
+//    public Task(String description){
+//        this.description = description;
+//    }
     //task has no ID
-    public Task(String description, Date dueDate, String attachment, String typeOfTask){
+    public Task(String description, String dueDate, String attachment, String typeOfTask){
 
         this.taskID = staticTaskIDCounter;
         this.description = description;
         this.dueDate = dueDate;
         this.attachment = attachment;
         this. typeOfTask = typeOfTask;
+        staticTaskIDCounter++;
+    }
+    public Task(String description, String typeOfTask){
+        this.taskID = staticTaskIDCounter;
+        this.description = description;
+        this.typeOfTask = typeOfTask;
         staticTaskIDCounter++;
     }
     //override task constructor for task without due date
@@ -50,7 +57,7 @@ public class Task {
         this.typeOfTask = typeOfTask;
     }
     //override task constructor for task with ID and due date
-    public Task (int taskID, String description, Date dueDate, String attachment, String typeOfTask ){
+    public Task (int taskID, String description, String dueDate, String attachment, String typeOfTask ){
 
         this.taskID = taskID;
         this.description = description;
@@ -58,13 +65,41 @@ public class Task {
         this.attachment = attachment;
         this.typeOfTask = typeOfTask;
     }
+    //completed task constructor
+    public Task (int taskID, String description, String dueDate, String attachment, String typeOfTask, String dateCompleted, String completedBy ){
+
+        this.taskID = taskID;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.attachment = attachment;
+        this.typeOfTask = typeOfTask;
+        this.dateCompleted = dateCompleted;
+        this.completedBy = completedBy;
+    }
     //override task constructor generic constructor
     public Task ( ){
 
         this.taskID = staticTaskIDCounter;
         staticTaskIDCounter ++;
+        this.description = "";
+        this.dueDate = null;
+        this.attachment = null;
+        this.typeOfTask = "";
+        this.dateCompleted = null;
+        this.completedBy = "";
     }
+    //constuctor no task id
+    public Task(String description, String dueDate, String dateCompleted, String completedBy, String attachment, String typeOfTask){
 
+        this.taskID = staticTaskIDCounter;
+        staticTaskIDCounter ++;
+        this.description = description;
+        this.dueDate = dueDate;
+        this.attachment = attachment;
+        this.typeOfTask = typeOfTask;
+        this.dateCompleted = dateCompleted;
+        this.completedBy = completedBy;
+    }
     //excluding attachment because I don't know how I'm going to display/handle that yet
     public String toString(){
         return ("ID#: " + this.getTaskID() + " \nTask: " + this.description + " \nType of Task: " + this.typeOfTask +
@@ -90,11 +125,11 @@ public class Task {
         return description;
     }
 
-    public Date getDueDate(){
+    public String getDueDate(){
         return dueDate;
     }
 
-    public Date getDateCompleted(){
+    public String getDateCompleted(){
         return dateCompleted;
     }
 
@@ -106,7 +141,7 @@ public class Task {
         return completedBy;
     }
 
-    public void setDateCompleted(Date dateCompleted){
+    public void setDateCompleted(String dateCompleted){
         this.dateCompleted = dateCompleted;
     }
     public void setCompletedBy(String completedBy){

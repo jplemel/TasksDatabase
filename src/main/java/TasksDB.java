@@ -1,5 +1,3 @@
-import sun.rmi.runtime.Log;
-
 import java.sql.*;
 import java.util.Vector;
 
@@ -43,13 +41,14 @@ public class TasksDB {
 
             String createTableSQL[] = {
                     "CREATE TABLE IF NOT EXISTS Tasks(" +
-                            "TaskID int NULL AUTO_INCREMENT, " +
-                            "Description varchar(255), " +
-                            "DueDate DATE, " +
-                            "DateCompleted DATE, " +
-                            "CompletedBy varchar(255), " +
-                            "Attachment varchar(255), " +
-                            "TypeOfTask varchar(255)" +
+                            "TaskID int NOT NULL AUTO_INCREMENT, " +
+                            "Description VARCHAR(255)," +
+                            "DueDate VARCHAR(255)," +
+                            "DateCompleted VARCHAR(255)," +
+                            "CompletedBy VARCHAR(255)," +
+                            "Attachment VARCHAR(255)," +
+                            "TypeOfTask VARCHAR(255)," +
+                            "PRIMARY KEY (TaskID)" +
                             ")",
             };
             for (int x = 0; x < createTableSQL.length; x++){
@@ -76,10 +75,10 @@ public class TasksDB {
             //set up prepared statement
             String prepStatStr = "INSERT INTO Tasks VALUES(?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement insertPS = conn.prepareStatement(prepStatStr);
-            insertPS.setInt(1, 0);
+            insertPS.setInt(1, task.getTaskID());
             insertPS.setString(2, task.getDescription()); //task.description? or method?
-            insertPS.setDate(3, task.getDueDate());
-            insertPS.setDate(4, task.getDateCompleted());
+            insertPS.setString(3, task.getDueDate());
+            insertPS.setString(4, task.getDateCompleted());
             insertPS.setString(5, task.getCompletedBy());
             insertPS.setString(6, task.getAttachment());
             insertPS.setString(7, task.getTypeOfTask());
@@ -97,9 +96,9 @@ public class TasksDB {
         }
     }
 
-    void updateTask(int currentID, Task task){
+    void updateTask(int currentID, Task task) {
 
-        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
 
             String updateStr =
                     "UPDATE Tasks " +
@@ -114,8 +113,8 @@ public class TasksDB {
             PreparedStatement updatePS = conn.prepareStatement(updateStr);
 
             updatePS.setString(1, task.getDescription());
-            updatePS.setDate(2, task.getDueDate());
-            updatePS.setDate(3, task.getDateCompleted()); //get or set methods?? same question for above? in addTask()
+            updatePS.setString(2, task.getDueDate());
+            updatePS.setString(3, task.getDateCompleted()); //get or set methods?? same question for above? in addTask()
             updatePS.setString(4, task.getCompletedBy());
             updatePS.setString(5, task.getAttachment());
             updatePS.setString(6, task.getTypeOfTask());
@@ -128,31 +127,68 @@ public class TasksDB {
             updatePS.close();
             conn.close();
 
-        }
-        catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        Vector<Task> fetchAllTasks(){
+//       public Vector<Task> fetchAllTasks(){
+//            Vector<Task> allTasks = new Vector<>();
+//
+//            try ( //try with resources
+//
+//                  Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
+//                  Statement statement = conn.createStatement()){
+//
+//                String selectAllSQL = "SELECT * FROM Tasks";
+//                ResultSet rs = statement.executeQuery(selectAllSQL);
+//
+//                while (rs.next()){
+//                    int id = rs.getInt("TaskID");
+//                    String description = rs.getString("Description");
+//                    Date dueDate = rs.getDate("DueDate");
+//                    Date dateCompleted = rs.getDate("DateCompleted");
+//                    String completedBy = rs.getString("CompletedBy");
+//                    String attachment = rs.getString("Attachment");
+//                    String typeOfTask = rs.getString("TypeOfTask");
+//                    task = new Task(description, id, dueDate, dateCompleted, completedBy, attachment, typeOfTask);
+//                    allTasks.add(task);
+//                }
+//
+//                rs.close();
+//                statement.close();
+//                conn.close();
+//
+//                //log.debug("Retrieved all Tasks");
+//            } catch (SQLException e){
+//                e.printStackTrace();
+//               //return null; //we have to return something OR DO WE?
+//            }
+//        }
+//    }
+    }
+
+    public Vector<Task> fetchAllTasks(){
+
+
             Vector<Task> allTasks = new Vector<>();
 
             try ( //try with resources
 
                   Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
-                  Statement statement = conn.createStatement()){
+                  Statement statement = conn.createStatement()) {
 
                 String selectAllSQL = "SELECT * FROM Tasks";
                 ResultSet rs = statement.executeQuery(selectAllSQL);
 
-                while (rs.next()){
+                while (rs.next()) {
                     int id = rs.getInt("TaskID");
                     String description = rs.getString("Description");
-                    Date dueDate = rs.getDate("DueDate");
-                    Date dateCompleted = rs.getDate("DateCompleted");
+                    String dueDate = rs.getString("DueDate");
+                    String dateCompleted = rs.getString("DateCompleted");
                     String completedBy = rs.getString("CompletedBy");
                     String attachment = rs.getString("Attachment");
                     String typeOfTask = rs.getString("TypeOfTask");
-                    Task task = new Task(description, id,dueDate, dateCompleted, completedBy, attachment, typeOfTask);
+                    Task task = new Task(id, description, dueDate, dateCompleted, completedBy, attachment, typeOfTask);
                     allTasks.add(task);
                 }
 
@@ -160,10 +196,67 @@ public class TasksDB {
                 statement.close();
                 conn.close();
 
+                return allTasks;
                 //log.debug("Retrieved all Tasks");
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
-               // return null; //we have to return something OR DO WE?
+                return null; //we have to return something OR DO WE?
             }
+
+
         }
-    }}
+
+    public void deleteTask(int taskID) {
+
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
+
+            String deleteStr = "DELETE FROM Tasks WHERE TaskID = ?";
+            PreparedStatement deletePs = conn.prepareStatement(deleteStr);
+
+            deletePs.setInt(1, taskID);
+            deletePs.executeUpdate();
+
+            deletePs.close();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int nextTaskID(){
+
+        try ( //try with resources
+
+              Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
+              Statement statement = conn.createStatement()) {
+
+            String selectAllSQL = "SELECT MAX(TaskID)FROM Tasks";
+            ResultSet rs = statement.executeQuery(selectAllSQL);
+
+            int id = 0;
+
+            while (rs.next()) {
+
+                if (rs.getInt("TaskID") > id){
+
+                    id = rs.getInt("TaskID");
+                }
+
+            }
+
+            rs.close();
+            statement.close();
+            conn.close();
+
+            return id;
+
+            //log.debug("Retrieved all Tasks");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0; //we have to return something OR DO WE?
+        }
+
+
+    }
+}
+
