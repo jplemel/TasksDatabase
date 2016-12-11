@@ -46,6 +46,8 @@ public class NewTaskGUI extends JFrame {
 
                     if (testEntryNotNull(taskTypeTextField.getText(), "Task Type")){
 
+
+                        //If it gets here, text fields are not null and user can continue
                         addNewButtonAddTasks();
                     }
 

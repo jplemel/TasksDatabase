@@ -100,6 +100,7 @@ public class TasksDB {
 
         try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
 
+
             String updateStr =
                     "UPDATE Tasks " +
                             "SET Description = ?, " +
@@ -107,64 +108,28 @@ public class TasksDB {
                             "DateCompleted = ?, " +
                             "CompletedBy = ?, " +
                             "Attachment = ?, " +
-                            "TypeOfTask = ?, " +
+                            "TypeOfTask = ? " +
 
-                            "WHERE TaskID = ?";
+                            "WHERE TaskID = " + String.valueOf(task.getTaskID());
+
             PreparedStatement updatePS = conn.prepareStatement(updateStr);
 
             updatePS.setString(1, task.getDescription());
             updatePS.setString(2, task.getDueDate());
-            updatePS.setString(3, task.getDateCompleted()); //get or set methods?? same question for above? in addTask()
+            updatePS.setString(3, task.getDateCompleted());
             updatePS.setString(4, task.getCompletedBy());
             updatePS.setString(5, task.getAttachment());
             updatePS.setString(6, task.getTypeOfTask());
-            updatePS.setInt(7, currentID);
 
             updatePS.executeUpdate();
-
-            //log.info("Updated record " + currentID + " to " + task);
-
+          //  updatePS.execute(updateStr);
             updatePS.close();
             conn.close();
+
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-//       public Vector<Task> fetchAllTasks(){
-//            Vector<Task> allTasks = new Vector<>();
-//
-//            try ( //try with resources
-//
-//                  Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
-//                  Statement statement = conn.createStatement()){
-//
-//                String selectAllSQL = "SELECT * FROM Tasks";
-//                ResultSet rs = statement.executeQuery(selectAllSQL);
-//
-//                while (rs.next()){
-//                    int id = rs.getInt("TaskID");
-//                    String description = rs.getString("Description");
-//                    Date dueDate = rs.getDate("DueDate");
-//                    Date dateCompleted = rs.getDate("DateCompleted");
-//                    String completedBy = rs.getString("CompletedBy");
-//                    String attachment = rs.getString("Attachment");
-//                    String typeOfTask = rs.getString("TypeOfTask");
-//                    task = new Task(description, id, dueDate, dateCompleted, completedBy, attachment, typeOfTask);
-//                    allTasks.add(task);
-//                }
-//
-//                rs.close();
-//                statement.close();
-//                conn.close();
-//
-//                //log.debug("Retrieved all Tasks");
-//            } catch (SQLException e){
-//                e.printStackTrace();
-//               //return null; //we have to return something OR DO WE?
-//            }
-//        }
-//    }
     }
 
     public Vector<Task> fetchAllTasks(){

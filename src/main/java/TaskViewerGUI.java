@@ -17,6 +17,11 @@ public class TaskViewerGUI extends JFrame {
     private JButton taskCompletedButton;
     private JTable taskTable;
     private JScrollPane scrollPane;
+    private JTextField completedByTextField;
+    private JTextField dateCompletedTextField;
+    private JButton updateTaskCompletedButton;
+    private JLabel completedByLabel;
+    private JLabel dateCompletedLabel;
     private JFrame frame;
 
 
@@ -95,6 +100,7 @@ public class TaskViewerGUI extends JFrame {
 //            InstructUserLabel.setText("No tasks in queue");
 //        }
 
+
     }
 
     private void addListeners(){
@@ -157,10 +163,16 @@ public class TaskViewerGUI extends JFrame {
         editTaskButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                //Navigate to EditTaskGUI
-                // I dont know if this is the call...
-                //rootPanel2(setVisible(true));
-                //controller.addTaskToDatabase(taskTM.getTasksAtRow(taskTable.getSelectedRow()));
+                //Ask the JTable what task is selected @ row
+                int toEditRowNum = taskTable.getSelectedRow();
+
+                //Get task object to edit from corresponding row
+                Task taskToEdit = controller.ttm.getTasksAtRow(toEditRowNum);
+
+                //Navigate to EditTaskGUI (passing taskToEdit)
+                controller.showGuiEditTask(taskToEdit);
+
+
             }
         });
         deleteTaskButton.addActionListener(new ActionListener() {
@@ -206,6 +218,41 @@ public class TaskViewerGUI extends JFrame {
 
                 //this is where you would add completed date and completed by information
 
+                //make labels visible
+                completedByLabel.setVisible(true);
+                dateCompletedLabel.setVisible(true);
+                //make text fields visible
+                completedByTextField.setVisible(true);
+                dateCompletedTextField.setVisible(true);
+                //make button visible
+                updateTaskCompletedButton.setVisible(true);
+
+
+            }
+        });
+
+        updateTaskCompletedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                //check if null
+                if (testEntryNotNull(completedByTextField.getText(), "Completed By")){
+
+                    if (testEntryNotNull(dateCompletedTextField.getText(), "Date Completed")){
+
+
+                        //If it gets here, text fields are not null and user can continue
+                       updateTask();
+                    }
+
+                }else{
+
+                    //Data invalid, user cannot continue
+
+                }
+
+                //update changes made to task
+
             }
         });
     }
@@ -216,5 +263,64 @@ public class TaskViewerGUI extends JFrame {
        // taskTM.updateData(allTasks);
 
         controller.ttm.updateData(allTasks);
+    }
+
+    private boolean testEntryNotNull(String stringEntry, String fieldName){
+
+        //Data Validation to determine if is not null
+
+        //stringEntry is the string to test
+        //fieldName displayed to user (@inform user label)
+
+        if (stringEntry == null || stringEntry.length() == 0){
+
+            InstructUserLabel.setText("Must enter a " + fieldName + " to continue.");
+
+            return false;
+
+        } else {
+            return true;
+        }
+    }
+    //Method with logic to update the task
+    private void updateTask(){
+
+
+        //Ask the JTable what task is selected @ row
+        int toUpdate = taskTable.getSelectedRow();
+
+        //Get task object to delete from corresponding row
+        Task taskToUpdate = controller.ttm.getTasksAtRow(toUpdate);
+
+        int taskID =  taskToUpdate.getTaskID();
+        String description = taskToUpdate.getDescription();
+        String dueDate = taskToUpdate.getDueDate();
+        String dateCompleted = dateCompletedTextField.getText();
+        String completedBy = completedByTextField.getText();
+        String attachment = taskToUpdate.getAttachment();
+        String taskType = taskToUpdate.getTypeOfTask();
+
+        //New Task
+        //TODO Add attachment to task
+        Task tNew = new Task(taskID, description, dueDate, dateCompleted, completedBy, attachment, taskType);
+        //Update task to database via controller
+        controller.updateTask(taskID,tNew);
+
+        //make labels not visible
+        completedByLabel.setVisible(false);
+        dateCompletedLabel.setVisible(false);
+        //make text fields not visible
+        completedByTextField.setVisible(false);
+        dateCompletedTextField.setVisible(false);
+        //make button not visible
+        updateTaskCompletedButton.setVisible(false);
+
+
+        controller.updateGUIJTableAfterUpdate();
+
+
+
+
+
     }
 }
