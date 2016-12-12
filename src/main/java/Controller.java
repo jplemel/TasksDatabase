@@ -101,14 +101,14 @@ public class Controller {
     public void addTaskToDatabase(Task task) throws FileNotFoundException {
         //this is a thing
         byte[] attachment = task.getAttachment();
-        if (task.getAttachment().length > 1){
+        if (attachment != null){
 
             db.addTask(task,path);
         }
-        //else {
+        else {
 
-        //    db.addTask(task);
-       // }
+           db.addTask(task);
+        }
 
     }
 

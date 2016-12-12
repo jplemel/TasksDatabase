@@ -72,8 +72,8 @@ public class TasksDB {
 
     void addTask(Task task) throws FileNotFoundException {
 //
-        File image = null;
-        FileInputStream fis = new FileInputStream(image);
+//        File image = null;
+//        FileInputStream fis = new FileInputStream(image);
         //try with resources connect to database
 
         try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
@@ -86,7 +86,7 @@ public class TasksDB {
             insertPS.setString(3, task.getDueDate());
             insertPS.setString(4, task.getDateCompleted());
             insertPS.setString(5, task.getCompletedBy());
-            insertPS.setBinaryStream(6, fis, 0);
+            insertPS.setBinaryStream(6, null, 0);
             insertPS.setString(7, task.getTypeOfTask());
 
             //actually put it in the database
@@ -194,11 +194,20 @@ public class TasksDB {
                     String dueDate = rs.getString("DueDate");
                     String dateCompleted = rs.getString("DateCompleted");
                     String completedBy = rs.getString("CompletedBy");
-                    //byte[] attachment = rs.getBytes();
+                    byte[] attachment = null;
+
 
                     Blob imageBlob = rs.getBlob("Attachment");
-                    byte[] attachment = imageBlob.getBytes(1, (int) imageBlob.length());
-                    InputStream binaryStream = rs.getBinaryStream("Attachment");
+
+                    if (imageBlob != null){
+                        attachment = imageBlob.getBytes(1, (int) imageBlob.length());
+                        InputStream binaryStream = rs.getBinaryStream("Attachment");
+                    }
+                    else {
+                        attachment = null;
+                    }
+
+
 
                     String typeOfTask = rs.getString("TypeOfTask");
                     Task task = new Task(id, description, dueDate, dateCompleted, completedBy, attachment, typeOfTask);
@@ -246,19 +255,17 @@ public class TasksDB {
             String selectAllSQL = "SELECT MAX(TaskID)FROM Tasks";
             ResultSet rs = statement.executeQuery(selectAllSQL);
 
-            int id = 0;
 
-            while (rs.next()) {
+            int id = rs.getInt("TaskID");
 
-                if (rs.getInt("TaskID") > id){
+           while (rs.next()) {
 
-                    id = rs.getInt("TaskID");
-                }
+                id = rs.getInt("TaskID");
 
 
-            }
+           }
 
-            id++;
+
             rs.close();
             statement.close();
             conn.close();

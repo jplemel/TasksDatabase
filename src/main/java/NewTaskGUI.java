@@ -130,10 +130,14 @@ public class NewTaskGUI extends JFrame {
 
 
 
-        int taskID = controller.nextTaskID;
-        if (taskID == 0){
-            taskID++;
-        }
+//        int taskID = controller.nextTaskID;
+//        if (taskID == 0){
+//            taskID++;
+//        }
+
+//        int taskID = controller.allTasks.lastElement().getTaskID();
+
+    //    taskID++;
 
         String description = taskDescriptionTextField.getText();
         String dueDate = dueDateTextField.getText();
@@ -144,7 +148,7 @@ public class NewTaskGUI extends JFrame {
 
         //New Task
         //TODO Add attachment to task
-        Task tNew = new Task(taskID, description, dueDate, dateCompleted, completedBy, attachment, taskType);
+        Task tNew = new Task(description, dueDate, dateCompleted, completedBy, attachment, taskType);
         //Add task to database via controller
         controller.addTaskToDatabase(tNew);
 
