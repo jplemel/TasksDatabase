@@ -110,7 +110,7 @@ public class EditTaskGUI extends JFrame{
         String dueDate = dueDateTextField.getText();
         String dateCompleted = dateCompleteTextField.getText();
         String completedBy = completedByTextField.getText();
-        String attachment = "";
+        byte[] attachment = new byte[0];
         String taskType = typeOfTaskTextField.getText();
 
         //New Task

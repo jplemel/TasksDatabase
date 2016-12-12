@@ -11,7 +11,7 @@ public class Task {
     private String dueDate;
     private String dateCompleted;
     private String completedBy;
-    private String attachment;
+    private byte[] attachment;
     private String typeOfTask;
     private Controller controller;
 
@@ -24,7 +24,7 @@ public class Task {
 //        this.description = description;
 //    }
     //task has no ID
-    public Task(String description, String dueDate, String attachment, String typeOfTask){
+    public Task(String description, String dueDate, byte[] attachment, String typeOfTask){
 
         this.taskID = staticTaskIDCounter;
         this.description = description;
@@ -40,7 +40,7 @@ public class Task {
         staticTaskIDCounter++;
     }
     //override task constructor for task without due date
-    public Task(String description, String attachment, String typeOfTask){
+    public Task(String description, byte[] attachment, String typeOfTask){
 
         this.taskID = staticTaskIDCounter;
         this.description = description;
@@ -49,7 +49,7 @@ public class Task {
         staticTaskIDCounter++;
     }
     //override task constructor for task that already has ID
-    public Task (int taskID, String description, String attachment, String typeOfTask ){
+    public Task (int taskID, String description, byte[] attachment, String typeOfTask ){
 
         this.taskID = taskID;
         this.description = description;
@@ -57,7 +57,7 @@ public class Task {
         this.typeOfTask = typeOfTask;
     }
     //override task constructor for task with ID and due date
-    public Task (int taskID, String description, String dueDate, String attachment, String typeOfTask ){
+    public Task (int taskID, String description, String dueDate, byte[] attachment, String typeOfTask ){
 
         this.taskID = taskID;
         this.description = description;
@@ -66,7 +66,7 @@ public class Task {
         this.typeOfTask = typeOfTask;
     }
     //completed task constructor
-    public Task (int taskID, String description, String dueDate, String attachment, String typeOfTask, String dateCompleted, String completedBy ){
+    public Task (int taskID, String description, String dueDate, String dateCompleted, String completedBy, byte[] attachment, String typeOfTask ){
 
         this.taskID = taskID;
         this.description = description;
@@ -89,7 +89,7 @@ public class Task {
         this.completedBy = "";
     }
     //constuctor no task id
-    public Task(String description, String dueDate, String dateCompleted, String completedBy, String attachment, String typeOfTask){
+    public Task(String description, String dueDate, String dateCompleted, String completedBy, byte[] attachment, String typeOfTask){
 
         this.taskID = staticTaskIDCounter;
         staticTaskIDCounter ++;
@@ -102,8 +102,8 @@ public class Task {
     }
     //excluding attachment because I don't know how I'm going to display/handle that yet
     public String toString(){
-        return ("ID#: " + this.getTaskID() + " \nTask: " + this.description + " \nType of Task: " + this.typeOfTask +
-                " \nDue Date: " + this.dueDate);
+        return ("ID#: " + this.getTaskID() + "Task: " + this.description +  "Due Date: " + this.dueDate + "Date Completed: " + this.dateCompleted +
+                "Completed By: " + this.completedBy + "Attachment: " + this.attachment + "Type of Task: " + this.typeOfTask);
     }
 
     //for completed tasks excluding attachment
@@ -147,7 +147,7 @@ public class Task {
     public void setCompletedBy(String completedBy){
         this.completedBy = completedBy;
     }
-    public String getAttachment(){
+    public byte[] getAttachment(){
         return attachment;
     }
 

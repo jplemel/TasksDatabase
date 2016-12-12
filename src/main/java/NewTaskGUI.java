@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 /**
  * Created by Jennifer Plemel on 12/4/2016.
@@ -28,6 +32,7 @@ public class NewTaskGUI extends JFrame {
 
 
 
+
         addListener();
 
 
@@ -48,7 +53,12 @@ public class NewTaskGUI extends JFrame {
 
 
                         //If it gets here, text fields are not null and user can continue
-                        addNewButtonAddTasks();
+                        try {
+                            addNewButtonAddTasks();
+                        }
+                        catch (FileNotFoundException e1) {
+                            e1.printStackTrace();
+                        }
                     }
 
                 }else{
@@ -58,6 +68,43 @@ public class NewTaskGUI extends JFrame {
                 }
 
                 //controller.showGui();
+            }
+        });
+
+        addAttachmentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+
+
+                JFileChooser picchooser = new JFileChooser();
+                picchooser.setDialogTitle("Select Image");
+                picchooser.showOpenDialog(null);
+
+                //this is the file the user selected from JFileChooser
+                File pic = picchooser.getSelectedFile();
+
+
+                controller.path = pic.getAbsolutePath();
+                informUserLabel.setText(controller.path.replace('\\','/'));
+
+                try{
+                    File image = new File(controller.path);
+                    FileInputStream fis = new FileInputStream(image);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buff = new byte[1024];
+                    for(int readNum; (readNum=fis.read(buff)) !=-1 ; ){
+                        baos.write(buff,0,readNum);
+                    }
+                    controller.userimage = baos.toByteArray();
+                }
+                catch(Exception e1){
+                    JOptionPane.showMessageDialog(null, e);
+                }
+
+
+
+
             }
         });
     }
@@ -79,16 +126,20 @@ public class NewTaskGUI extends JFrame {
             return true;
         }
     }
-    private void addNewButtonAddTasks(){
+    private void addNewButtonAddTasks() throws FileNotFoundException {
 
 
 
         int taskID = controller.nextTaskID;
+        if (taskID == 0){
+            taskID++;
+        }
+
         String description = taskDescriptionTextField.getText();
         String dueDate = dueDateTextField.getText();
         String dateCompleted = "";
         String completedBy = "";
-        String attachment = "";
+        byte[] attachment = controller.userimage;
         String taskType = taskTypeTextField.getText();
 
         //New Task
@@ -97,24 +148,10 @@ public class NewTaskGUI extends JFrame {
         //Add task to database via controller
         controller.addTaskToDatabase(tNew);
 
-        //Add task to Table Model via controller
-        //controller.allTasks.add(tNew);
 
-
-        //controller.updateGUIJTableAfterAdd();
 
         controller.showGui();
 
-//        //Refresh allTasks object (updateData calls fireTableDataChanged (which updates JTable)
-//        controller.ttm.updateData(controller.allTasks);
-//
-//        //Refreshed all tasks and reassigning values to taskTM (tableModel)
-//        TaskTableModel taskTM = new TaskTableModel(controller.getAllTasks());
-//
-//        //refresh GUI display
-//        //Configure the JTable to use this model as its data source
-//
-//        //taskTable.setModel(taskTM);
 
 
 

@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.io.FileNotFoundException;
 import java.util.Vector;
 //figure out import statements!!
 
@@ -19,6 +20,8 @@ public class Controller {
     public static TaskTableModel ttm;
     public Vector<Task> allTasks;
     public int nextTaskID;
+    public String path = null;
+    public byte[] userimage = null;
     ///public static Task taskToEdit;
 
 
@@ -69,14 +72,14 @@ public class Controller {
     public static void showGui(){
         gui.setVisible(true);
         guiNewTask.setVisible(false);
-        guiEditTask.setVisible(false);
+//        guiEditTask.setVisible(false);
     }
 
     //trying to show guiNewTask
     public static void showGuiNewTask(){
         guiNewTask.setVisible(true);
         gui.setVisible(false);
-        guiEditTask.setVisible(false);
+ //       guiEditTask.setVisible(false);
     }
     //show guiEditTask
     public void showGuiEditTask(Task task){
@@ -86,7 +89,7 @@ public class Controller {
        // guiEditTask.taskToEdit = task;
 
         guiEditTask.setVisible(true);
-        guiNewTask.setVisible(false);
+      //  guiNewTask.setVisible(false);
         gui.setVisible(false);
     }
 
@@ -95,8 +98,18 @@ public class Controller {
         return db.fetchAllTasks();
     }
 
-    public void addTaskToDatabase(Task task){
-        db.addTask(task);
+    public void addTaskToDatabase(Task task) throws FileNotFoundException {
+        //this is a thing
+        byte[] attachment = task.getAttachment();
+        if (task.getAttachment().length > 1){
+
+            db.addTask(task,path);
+        }
+        //else {
+
+        //    db.addTask(task);
+       // }
+
     }
 
     void updateTask(int currentID, Task task){

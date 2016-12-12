@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.Vector;
 
@@ -46,7 +50,7 @@ public class TasksDB {
                             "DueDate VARCHAR(255)," +
                             "DateCompleted VARCHAR(255)," +
                             "CompletedBy VARCHAR(255)," +
-                            "Attachment VARCHAR(255)," +
+                            "Attachment BLOB," +
                             "TypeOfTask VARCHAR(255)," +
                             "PRIMARY KEY (TaskID)" +
                             ")",
@@ -66,8 +70,10 @@ public class TasksDB {
         }
     }
 
-    void addTask(Task task){
-
+    void addTask(Task task) throws FileNotFoundException {
+//
+        File image = null;
+        FileInputStream fis = new FileInputStream(image);
         //try with resources connect to database
 
         try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
@@ -80,11 +86,13 @@ public class TasksDB {
             insertPS.setString(3, task.getDueDate());
             insertPS.setString(4, task.getDateCompleted());
             insertPS.setString(5, task.getCompletedBy());
-            insertPS.setString(6, task.getAttachment());
+            insertPS.setBinaryStream(6, fis, 0);
             insertPS.setString(7, task.getTypeOfTask());
 
             //actually put it in the database
             insertPS.execute();
+
+
 
             //log.info("Added Task for " + task);
 
@@ -95,7 +103,39 @@ public class TasksDB {
             e.printStackTrace();
         }
     }
+    void addTask(Task task, String path) throws FileNotFoundException {
+//
+        File image = new File(path);
+        FileInputStream fis = new FileInputStream(image);
+        //try with resources connect to database
 
+        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)){
+
+            //set up prepared statement
+            String prepStatStr = "INSERT INTO Tasks VALUES(?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement insertPS = conn.prepareStatement(prepStatStr);
+            insertPS.setInt(1, task.getTaskID());
+            insertPS.setString(2, task.getDescription()); //task.description? or method?
+            insertPS.setString(3, task.getDueDate());
+            insertPS.setString(4, task.getDateCompleted());
+            insertPS.setString(5, task.getCompletedBy());
+            insertPS.setBinaryStream(6, fis, task.getAttachment().length);
+            insertPS.setString(7, task.getTypeOfTask());
+
+            //actually put it in the database
+            insertPS.execute();
+
+
+
+            //log.info("Added Task for " + task);
+
+            insertPS.close();
+            conn.close();
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
     void updateTask(int currentID, Task task) {
 
         try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
@@ -118,7 +158,7 @@ public class TasksDB {
             updatePS.setString(2, task.getDueDate());
             updatePS.setString(3, task.getDateCompleted());
             updatePS.setString(4, task.getCompletedBy());
-            updatePS.setString(5, task.getAttachment());
+            updatePS.setBytes(5, task.getAttachment());
             updatePS.setString(6, task.getTypeOfTask());
 
             updatePS.executeUpdate();
@@ -137,6 +177,9 @@ public class TasksDB {
 
             Vector<Task> allTasks = new Vector<>();
 
+
+
+
             try ( //try with resources
 
                   Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD);
@@ -151,7 +194,12 @@ public class TasksDB {
                     String dueDate = rs.getString("DueDate");
                     String dateCompleted = rs.getString("DateCompleted");
                     String completedBy = rs.getString("CompletedBy");
-                    String attachment = rs.getString("Attachment");
+                    //byte[] attachment = rs.getBytes();
+
+                    Blob imageBlob = rs.getBlob("Attachment");
+                    byte[] attachment = imageBlob.getBytes(1, (int) imageBlob.length());
+                    InputStream binaryStream = rs.getBinaryStream("Attachment");
+
                     String typeOfTask = rs.getString("TypeOfTask");
                     Task task = new Task(id, description, dueDate, dateCompleted, completedBy, attachment, typeOfTask);
                     allTasks.add(task);
@@ -207,8 +255,10 @@ public class TasksDB {
                     id = rs.getInt("TaskID");
                 }
 
+
             }
 
+            id++;
             rs.close();
             statement.close();
             conn.close();
@@ -223,5 +273,22 @@ public class TasksDB {
 
 
     }
-}
+
+//    public void addAttachment(){
+//
+//        try (Connection conn = DriverManager.getConnection(DB_CONNECTION_URL, USER, PASSWORD)) {
+//
+//
+//
+//
+//
+//            PreparedStatement updatePS = conn.prepareStatement(updateStr);
+//
+//            updatePs = conn.prepareStatement(sql);
+//
+//            updatePS.setString(1, attachment);
+//            updatePS.setBinaryStream(2, fis, (int) file.length());
+//        }
+    }
+
 

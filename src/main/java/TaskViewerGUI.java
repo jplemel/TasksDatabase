@@ -1,7 +1,10 @@
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Vector;
 
 
@@ -22,6 +25,7 @@ public class TaskViewerGUI extends JFrame {
     private JButton updateTaskCompletedButton;
     private JLabel completedByLabel;
     private JLabel dateCompletedLabel;
+    private JLabel imageLabel;
     private JFrame frame;
 
 
@@ -101,6 +105,42 @@ public class TaskViewerGUI extends JFrame {
 //        }
 
 
+
+        //This is me trying to display an image from the image path, nothing is happening
+
+       /* rootPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+
+                //https://www.mkyong.com/java/how-to-read-an-image-from-file-or-url/
+                //https://www.youtube.com/watch?v=nHCCubgd74s
+
+
+                    Image image = null;
+
+                    try{
+
+                        File sourceImage = new File(controller.path);
+                        BufferedImage image1 = ImageIO.read(sourceImage);
+//                        Image image2 = image1.getImage().getScaledInstance(imageLabel.getWidth(), imageLabel.getHeight(), Image.SCALE_SMOOTH);
+//                        ImageIcon image3 = new ImageIcon(image2);
+//                        imageLabel.setIcon(image3);
+                    }
+                    catch (IOException e1){
+                        e1.printStackTrace();
+                    }
+
+                    JLabel imageLabel = new JLabel(new ImageIcon(image));
+                    frame.add(imageLabel);
+                    frame.setVisible(true);
+
+
+
+
+
+            }
+        });*/
     }
 
     private void addListeners(){
@@ -146,7 +186,12 @@ public class TaskViewerGUI extends JFrame {
 
                 controller.allTasks = controller.db.fetchAllTasks();
 
-                controller.db.nextTaskID();
+                if (controller.allTasks.size() > 0){
+
+                    controller.db.nextTaskID();
+                }
+
+
 
                 setTaskListData(controller.allTasks);
 
@@ -190,7 +235,7 @@ public class TaskViewerGUI extends JFrame {
                 //Delete from database with task item to delete
                 controller.deleteTask(taskIDtoDelete);
 
-                controller.updateGUIJTableAfterDelete(taskTable);
+                controller.updateGUIJTableAfterDelete();
 
                 //map the tasktable to be accessible from controller
                 //controller.controllerJTable = taskTable;
@@ -297,7 +342,7 @@ public class TaskViewerGUI extends JFrame {
         String dueDate = taskToUpdate.getDueDate();
         String dateCompleted = dateCompletedTextField.getText();
         String completedBy = completedByTextField.getText();
-        String attachment = taskToUpdate.getAttachment();
+        byte[] attachment = taskToUpdate.getAttachment();
         String taskType = taskToUpdate.getTypeOfTask();
 
         //New Task
