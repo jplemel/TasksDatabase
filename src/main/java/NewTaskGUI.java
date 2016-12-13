@@ -23,6 +23,7 @@ public class NewTaskGUI extends JFrame {
     public NewTaskGUI(Controller task) {
 
         setContentPane(rootPanel1);
+        //setSize(800,400);
         pack();
         getRootPane().setDefaultButton(saveButton);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

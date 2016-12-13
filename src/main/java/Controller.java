@@ -77,6 +77,7 @@ public class Controller {
 
     //trying to show guiNewTask
     public static void showGuiNewTask(){
+        guiNewTask.setSize(600,400);
         guiNewTask.setVisible(true);
         gui.setVisible(false);
  //       guiEditTask.setVisible(false);
@@ -84,10 +85,11 @@ public class Controller {
     //show guiEditTask
     public void showGuiEditTask(Task task){
 
+
         guiEditTask = new EditTaskGUI(task);
 
        // guiEditTask.taskToEdit = task;
-
+        guiEditTask.setSize(500,300);
         guiEditTask.setVisible(true);
       //  guiNewTask.setVisible(false);
         gui.setVisible(false);

@@ -12,7 +12,6 @@ public class EditTaskGUI extends JFrame{
     private JTextField dueDateTextField;
     private JTextField dateCompleteTextField;
     private JTextField completedByTextField;
-    private JButton attachmentButton;
     private JTextField typeOfTaskTextField;
     private JButton updateTaskButton;
     private JLabel informUserLabel;
@@ -26,6 +25,7 @@ public class EditTaskGUI extends JFrame{
 
 
         setContentPane(rootPanel2);
+        //setSize(600,400);
         pack();
         getRootPane().setDefaultButton(updateTaskButton);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
